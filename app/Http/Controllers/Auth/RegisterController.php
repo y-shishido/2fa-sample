@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Foundation\Auth\RegistersUsers;
+use PragmaRX\Google2FA\Google2FA;
 
 class RegisterController extends Controller
 {
@@ -60,13 +61,19 @@ class RegisterController extends Controller
      *
      * @param  array  $data
      * @return \App\User
+     * @throws \PragmaRX\Google2FA\Exceptions\IncompatibleWithGoogleAuthenticatorException
+     * @throws \PragmaRX\Google2FA\Exceptions\InvalidCharactersException
      */
     protected function create(array $data)
     {
+        // SecretKeyを生成
+        $g2fa = new Google2FA();
+        $key = $g2fa->generateSecretKey();
         return User::create([
             'name' => $data['name'],
             'email' => $data['email'],
             'password' => Hash::make($data['password']),
+            'g2fa_key' => $key, // カラムに登録
         ]);
     }
 }
